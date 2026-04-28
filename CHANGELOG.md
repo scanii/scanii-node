@@ -2,7 +2,7 @@
 
 All notable changes to `@scanii/core` are documented here. Versions follow [SemVer](https://semver.org).
 
-## 1.0.0 — Initial release
+## 1.0.1 — Initial release
 
 First public release of the Scanii Node SDK as `@scanii/core`.
 
