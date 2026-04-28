@@ -1,0 +1,12 @@
+src/
+tests/
+node_modules/
+coverage/
+.github/
+.gitignore
+.eslintrc*
+eslint.config.*
+jest.config.*
+tsconfig.json
+*.log
+*.tsbuildinfo
