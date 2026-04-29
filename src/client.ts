@@ -1,3 +1,7 @@
+import { createReadStream } from 'node:fs';
+import { basename } from 'node:path';
+import { Readable } from 'node:stream';
+
 import { ScaniiAuthError, ScaniiError, ScaniiRateLimitError } from './errors';
 import type { ScaniiAuthToken } from './models/auth-token';
 import type { ScaniiPendingResult } from './models/pending-result';
@@ -36,11 +40,16 @@ export interface ScaniiClientOptions {
 }
 
 /**
- * Body accepted by {@link ScaniiClient.process} / `processAsync`. Anything
- * `fetch`'s `FormData.append` accepts as a third argument is fine: a `Blob`,
- * a `File`, or in Node a `Buffer` / `Uint8Array` (auto-wrapped in a `Blob`).
+ * Body accepted by {@link ScaniiClient.process} / `processAsync`.
+ *
+ * - `Blob` / `File` — works in Node and browsers.
+ * - `ArrayBuffer` / `ArrayBufferView` — auto-wrapped in a `Blob`.
+ * - `ReadableStream` — Web Streams API, native in Node 22+. The stream is
+ *   passed directly as the `fetch` body, so memory use is independent of
+ *   content length. **Node-only when using `ReadableStream`** — browsers
+ *   may also support it in modern environments.
  */
-export type ScaniiContent = Blob | ArrayBuffer | ArrayBufferView;
+export type ScaniiContent = Blob | ArrayBuffer | ArrayBufferView | ReadableStream;
 
 interface RawResponse {
   status: number;
@@ -105,8 +114,15 @@ export class ScaniiClient {
   }
 
   /**
-   * Submit a file synchronously. The returned promise resolves once the API
+   * Submit content synchronously. The returned promise resolves once the API
    * has scanned the content and returned the result (HTTP 201).
+   *
+   * Accepts `Blob`, `File`, `ArrayBuffer`, any `ArrayBufferView`, or a
+   * `ReadableStream` (Web Streams API). When passing a `ReadableStream`, the
+   * stream is buffered to a `Blob` before upload — Node 22's `fetch` and
+   * `FormData` do not accept raw streams as multipart parts.
+   *
+   * For file-on-disk uploads, prefer {@link processFile} (Node-only).
    *
    * @see {@link https://scanii.github.io/openapi/v22/} — `POST /files`
    */
@@ -115,7 +131,31 @@ export class ScaniiClient {
     metadata: Record<string, string> = {},
     callback?: string,
   ): Promise<ScaniiProcessingResult> {
-    const form = buildMultipart(content, metadata, callback);
+    const form = await buildMultipart(content, metadata, callback);
+    const res = await this.request('POST', '/files', form);
+    if (res.status !== 201) {
+      this.throwForStatus(res);
+    }
+    return parseProcessingResult(res);
+  }
+
+  /**
+   * Submit a file from disk for synchronous scanning. Opens the file as a
+   * stream and delegates to {@link process}. The filename in the multipart
+   * upload is set to the basename of `path`.
+   *
+   * **Node-only** — uses `node:fs` and `node:stream`. Not available in browsers.
+   *
+   * @param path - Absolute or relative path to the file.
+   * @see {@link https://scanii.github.io/openapi/v22/} — `POST /files`
+   */
+  async processFile(
+    path: string,
+    metadata: Record<string, string> = {},
+    callback?: string,
+  ): Promise<ScaniiProcessingResult> {
+    const stream = Readable.toWeb(createReadStream(path)) as ReadableStream;
+    const form = await buildMultipart(stream, metadata, callback, basename(path));
     const res = await this.request('POST', '/files', form);
     if (res.status !== 201) {
       this.throwForStatus(res);
@@ -128,6 +168,8 @@ export class ScaniiClient {
    * result containing the id; the final result is delivered via the optional
    * `callback` URL or fetched later via {@link retrieve}.
    *
+   * Accepts the same content types as {@link process}.
+   *
    * @see {@link https://scanii.github.io/openapi/v22/} — `POST /files/async`
    */
   async processAsync(
@@ -135,7 +177,30 @@ export class ScaniiClient {
     metadata: Record<string, string> = {},
     callback?: string,
   ): Promise<ScaniiPendingResult> {
-    const form = buildMultipart(content, metadata, callback);
+    const form = await buildMultipart(content, metadata, callback);
+    const res = await this.request('POST', '/files/async', form);
+    if (res.status !== 202) {
+      this.throwForStatus(res);
+    }
+    return parsePendingResult(res);
+  }
+
+  /**
+   * Submit a file from disk for server-side asynchronous scanning. The
+   * filename in the multipart upload is set to the basename of `path`.
+   *
+   * **Node-only** — uses `node:fs` and `node:stream`. Not available in browsers.
+   *
+   * @param path - Absolute or relative path to the file.
+   * @see {@link https://scanii.github.io/openapi/v22/} — `POST /files/async`
+   */
+  async processAsyncFile(
+    path: string,
+    metadata: Record<string, string> = {},
+    callback?: string,
+  ): Promise<ScaniiPendingResult> {
+    const stream = Readable.toWeb(createReadStream(path)) as ReadableStream;
+    const form = await buildMultipart(stream, metadata, callback, basename(path));
     const res = await this.request('POST', '/files/async', form);
     if (res.status !== 202) {
       this.throwForStatus(res);
@@ -318,14 +383,15 @@ export class ScaniiClient {
   }
 }
 
-function buildMultipart(
+async function buildMultipart(
   content: ScaniiContent,
   metadata: Record<string, string>,
   callback: string | undefined,
-): FormData {
+  filename?: string,
+): Promise<FormData> {
   const form = new FormData();
-  const blob = toBlob(content);
-  form.append('file', blob, blobFilename(content));
+  const blob = await toBlob(content);
+  form.append('file', blob, filename ?? blobFilename(content));
   for (const [k, v] of Object.entries(metadata)) {
     form.append(`metadata[${k}]`, v);
   }
@@ -335,7 +401,7 @@ function buildMultipart(
   return form;
 }
 
-function toBlob(content: ScaniiContent): Blob {
+async function toBlob(content: ScaniiContent): Promise<Blob> {
   if (content instanceof Blob) {
     return content;
   }
@@ -350,7 +416,12 @@ function toBlob(content: ScaniiContent): Blob {
     bytes.set(new Uint8Array(view.buffer, view.byteOffset, view.byteLength));
     return new Blob([bytes], { type: 'application/octet-stream' });
   }
-  throw new Error('content must be a Blob, File, ArrayBuffer, or ArrayBufferView');
+  if (typeof ReadableStream !== 'undefined' && content instanceof ReadableStream) {
+    // Buffer the stream to a Blob. FormData.append does not accept ReadableStream
+    // directly — Node's fetch/FormData require a Blob or string part value.
+    return new Response(content).blob();
+  }
+  throw new Error('content must be a Blob, File, ArrayBuffer, ArrayBufferView, or ReadableStream');
 }
 
 function blobFilename(content: ScaniiContent): string {

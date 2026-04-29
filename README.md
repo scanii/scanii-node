@@ -22,15 +22,18 @@ npm install @scanii/core
 
 ```ts
 import { ScaniiClient } from '@scanii/core';
-import { readFileSync } from 'node:fs';
 
 const client = new ScaniiClient({
   key: process.env.SCANII_KEY!,
   secret: process.env.SCANII_SECRET!,
 });
 
-const result = await client.process(new Blob([readFileSync('document.pdf')]));
+// Scan a file from disk (Node-only):
+const result = await client.processFile('./document.pdf');
 console.log(result.findings);
+
+// Or pass any supported content type:
+const result2 = await client.process(new Blob([buffer]));
 ```
 
 In the browser, pass a `File` from an `<input type="file">`:
@@ -47,7 +50,9 @@ For browser usage, prefer minting a short-lived auth token server-side and const
 | Method | REST | Returns |
 |---|---|---|
 | `process(content, metadata?, callback?)` | `POST /files` | `Promise<ScaniiProcessingResult>` |
+| `processFile(path, metadata?, callback?)` | `POST /files` | `Promise<ScaniiProcessingResult>` |
 | `processAsync(content, metadata?, callback?)` | `POST /files/async` | `Promise<ScaniiPendingResult>` |
+| `processAsyncFile(path, metadata?, callback?)` | `POST /files/async` | `Promise<ScaniiPendingResult>` |
 | `fetch(url, metadata?, callback?)` | `POST /files/fetch` | `Promise<ScaniiPendingResult>` |
 | `retrieve(id)` | `GET /files/{id}` | `Promise<ScaniiProcessingResult>` |
 | `ping()` | `GET /ping` | `Promise<boolean>` |
@@ -55,7 +60,9 @@ For browser usage, prefer minting a short-lived auth token server-side and const
 | `retrieveAuthToken(id)` | `GET /auth/tokens/{id}` | `Promise<ScaniiAuthToken>` |
 | `deleteAuthToken(id)` | `DELETE /auth/tokens/{id}` | `Promise<boolean>` |
 
-`content` accepts `Blob`, `File`, `ArrayBuffer`, or any `ArrayBufferView` (e.g. `Uint8Array`, `Buffer`).
+`processFile` / `processAsyncFile` are **Node-only** (use `node:fs`); browsers use `process(blob, ...)`.
+
+`content` accepts `Blob`, `File`, `ArrayBuffer`, any `ArrayBufferView` (e.g. `Uint8Array`, `Buffer`), or `ReadableStream` (Web Streams API, Node 22+).
 
 Full API reference: <https://scanii.github.io/openapi/v22/>.
 
