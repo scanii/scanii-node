@@ -125,6 +125,23 @@ describe('ScaniiClient request shape', () => {
     expect(r.statusCode).toBe(202);
   });
 
+  test('process accepts ReadableStream and sends multipart', async () => {
+    fetchSpy.mockResolvedValue(mockResponse(201, JSON.stringify({ id: 'stream-result', findings: [] })));
+
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('hello from stream'));
+        controller.close();
+      },
+    });
+
+    const result = await client.process(stream);
+    expect(result.id).toBe('stream-result');
+
+    const init = fetchSpy.mock.calls[0]![1] as RequestInit;
+    expect(init.body).toBeInstanceOf(FormData);
+  });
+
   test('fetch sends form-encoded body to /files/fetch', async () => {
     fetchSpy.mockResolvedValue(mockResponse(202, JSON.stringify({ id: 'pending-2' })));
 

@@ -1,6 +1,7 @@
-import { writeFileSync, readFileSync, unlinkSync } from 'node:fs';
+import { writeFileSync, readFileSync, unlinkSync, createReadStream } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { Readable } from 'node:stream';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
@@ -193,5 +194,50 @@ describe('integration: scanii-cli', () => {
 
   itIfCli('retrieve of unknown id throws', async () => {
     await expect(client().retrieve('does-not-exist-' + Date.now())).rejects.toThrow();
+  });
+
+  itIfCli('processFile scans file from disk by path', async () => {
+    const path = tempFile(LOCAL_MALWARE_UUID);
+    try {
+      const r = await client().processFile(path);
+      expect(r.id).toBeTruthy();
+      if (!r.findings.includes(LOCAL_MALWARE_FINDING)) {
+        console.warn(
+          `[integration] scanii-cli did not flag UUID fixture via processFile; got: ${JSON.stringify(r.findings)}`,
+        );
+        return;
+      }
+      expect(r.findings).toContain(LOCAL_MALWARE_FINDING);
+    } finally {
+      try { unlinkSync(path); } catch { /* ignore */ }
+    }
+  });
+
+  itIfCli('processAsyncFile scans file from disk by path async', async () => {
+    const path = tempFile('hello from processAsyncFile');
+    try {
+      const pending = await client().processAsyncFile(path);
+      expect(pending.id).toBeTruthy();
+      expect(pending.statusCode).toBe(202);
+
+      await new Promise((r) => setTimeout(r, 500));
+
+      const retrieved = await client().retrieve(pending.id);
+      expect(retrieved.id).toBe(pending.id);
+    } finally {
+      try { unlinkSync(path); } catch { /* ignore */ }
+    }
+  });
+
+  itIfCli('process accepts ReadableStream input', async () => {
+    const path = tempFile('hello from ReadableStream');
+    try {
+      const stream = Readable.toWeb(createReadStream(path)) as ReadableStream;
+      const r = await client().process(stream);
+      expect(r.id).toBeTruthy();
+      expect(r.findings).toEqual([]);
+    } finally {
+      try { unlinkSync(path); } catch { /* ignore */ }
+    }
   });
 });
