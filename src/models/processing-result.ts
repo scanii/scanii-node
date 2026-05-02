@@ -22,7 +22,13 @@ export interface ScaniiProcessingResult {
   readonly metadata: Readonly<Record<string, string>>;
   /** Server-side creation timestamp in ISO 8601 form. */
   readonly creationDate: string | undefined;
-  /** Server-supplied error message when the API set one (rare). */
+  /**
+   * @deprecated The server never populates this field on a successful response —
+   * server-side errors arrive as non-2xx responses and are surfaced via
+   * `ScaniiError` subclasses (catch and check `instanceof ScaniiAuthError`,
+   * `ScaniiRateLimitError`, or `ScaniiError`). Will be removed in a future
+   * major version.
+   */
   readonly error: string | undefined;
   /** `X-Scanii-Request-Id` response header — useful when contacting support. */
   readonly requestId: string | undefined;

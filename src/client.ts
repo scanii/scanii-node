@@ -6,6 +6,8 @@ import { ScaniiAuthError, ScaniiError, ScaniiRateLimitError } from './errors';
 import type { ScaniiAuthToken } from './models/auth-token';
 import type { ScaniiPendingResult } from './models/pending-result';
 import type { ScaniiProcessingResult } from './models/processing-result';
+import type { ScaniiTraceEvent } from './models/trace-event';
+import type { ScaniiTraceResult } from './models/trace-result';
 
 declare const SCANII_VERSION: string;
 
@@ -253,6 +255,65 @@ export class ScaniiClient {
   }
 
   /**
+   * Retrieve the processing event trace for a previously scanned file.
+   *
+   * Returns `undefined` when the id is not found (HTTP 404). All other
+   * error statuses throw a `ScaniiError` subclass as usual.
+   *
+   * **Preview surface** — part of the v2.2 API; behavior may change in future
+   * releases.
+   *
+   * @see {@link https://scanii.github.io/openapi/v22/} — `GET /files/{id}/trace`
+   */
+  async retrieveTrace(id: string): Promise<ScaniiTraceResult | undefined> {
+    if (!id) {
+      throw new Error('id must not be empty');
+    }
+    const res = await this.request('GET', '/files/' + encodeURIComponent(id) + '/trace');
+    if (res.status === 404) {
+      return undefined;
+    }
+    if (res.status !== 200) {
+      this.throwForStatus(res);
+    }
+    return parseTraceResult(res);
+  }
+
+  /**
+   * Submit a remote URL for synchronous processing. The API downloads the
+   * content from `location` and scans it, returning the result directly (HTTP
+   * 201). The `location` parameter is a plain string URL — not a `URL` object
+   * — matching the convention established by {@link fetch}.
+   *
+   * **Preview surface** — part of the v2.2 API; behavior may change in future
+   * releases.
+   *
+   * @see {@link https://scanii.github.io/openapi/v22/} — `POST /files`
+   */
+  async processFromUrl(
+    location: string,
+    options: { callback?: string; metadata?: Record<string, string> } = {},
+  ): Promise<ScaniiProcessingResult> {
+    if (!location) {
+      throw new Error('location must not be empty');
+    }
+    const { callback, metadata = {} } = options;
+    const form = new FormData();
+    form.append('location', location);
+    for (const [k, v] of Object.entries(metadata)) {
+      form.append(`metadata[${k}]`, v);
+    }
+    if (callback) {
+      form.append('callback', callback);
+    }
+    const res = await this.request('POST', '/files', form);
+    if (res.status !== 201) {
+      this.throwForStatus(res);
+    }
+    return parseProcessingResult(res);
+  }
+
+  /**
    * Verify that the configured credentials reach the API.
    *
    * @see {@link https://scanii.github.io/openapi/v22/} — `GET /ping`
@@ -446,6 +507,26 @@ function parseProcessingResult(res: RawResponse): ScaniiProcessingResult {
     requestId: res.headers.get('x-scanii-request-id') ?? undefined,
     hostId: res.headers.get('x-scanii-host-id') ?? undefined,
     resourceLocation: res.headers.get('location') ?? undefined,
+    statusCode: res.status,
+    rawResponse: res.body,
+  };
+}
+
+function parseTraceResult(res: RawResponse): ScaniiTraceResult {
+  const json = decodeJson(res.body);
+  const rawEvents = Array.isArray(json['events']) ? (json['events'] as unknown[]) : [];
+  const events: ScaniiTraceEvent[] = rawEvents.map((e) => {
+    const obj = e && typeof e === 'object' ? (e as Record<string, unknown>) : {};
+    return {
+      timestamp: stringField(obj['timestamp']),
+      message: stringField(obj['message']),
+    };
+  });
+  return {
+    id: stringField(json['id']) ?? '',
+    events,
+    requestId: res.headers.get('x-scanii-request-id') ?? undefined,
+    hostId: res.headers.get('x-scanii-host-id') ?? undefined,
     statusCode: res.status,
     rawResponse: res.body,
   };

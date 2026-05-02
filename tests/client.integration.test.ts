@@ -196,6 +196,34 @@ describe('integration: scanii-cli', () => {
     await expect(client().retrieve('does-not-exist-' + Date.now())).rejects.toThrow();
   });
 
+  itIfCli('retrieveTrace returns events for a known id', async () => {
+    const path = tempFile('hello trace');
+    try {
+      const processed = await client().process(readBlob(path));
+      const trace = await client().retrieveTrace(processed.id);
+      expect(trace).toBeDefined();
+      expect(trace!.events.length).toBeGreaterThan(0);
+      for (const ev of trace!.events) {
+        expect(ev.timestamp).toBeTruthy();
+        expect(ev.message).toBeTruthy();
+      }
+    } finally {
+      try { unlinkSync(path); } catch { /* ignore */ }
+    }
+  });
+
+  itIfCli('retrieveTrace returns undefined for unknown id', async () => {
+    const result = await client().retrieveTrace('does-not-exist-trace-' + Date.now());
+    expect(result).toBeUndefined();
+  });
+
+  itIfCli('processFromUrl fetches and scans remote URL synchronously', async () => {
+    const r = await client().processFromUrl(`${ENDPOINT}/static/eicar.txt`);
+    expect(r).toBeDefined();
+    expect(r.id).toBeTruthy();
+    expect(r.findings).toContain('content.malicious.eicar-test-signature');
+  });
+
   itIfCli('processFile scans file from disk by path', async () => {
     const path = tempFile(LOCAL_MALWARE_UUID);
     try {

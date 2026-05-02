@@ -1,6 +1,6 @@
 {
   "name": "@scanii/core",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Zero-dependency TypeScript SDK for the Scanii content security API",
   "license": "Apache-2.0",
   "repository": {
