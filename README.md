@@ -26,6 +26,7 @@ import { ScaniiClient } from '@scanii/core';
 const client = new ScaniiClient({
   key: process.env.SCANII_KEY!,
   secret: process.env.SCANII_SECRET!,
+  endpoint: 'https://api-us1.scanii.com',
 });
 
 // Scan a file from disk (Node-only):
@@ -98,13 +99,13 @@ new ScaniiClient({ key, secret, endpoint: 'https://api-eu1.scanii.com' });
 
 | Region | Endpoint |
 |---|---|
-| Auto (default) | `https://api.scanii.com` |
 | US 1 | `https://api-us1.scanii.com` |
 | EU 1 | `https://api-eu1.scanii.com` |
 | EU 2 | `https://api-eu2.scanii.com` |
 | AP 1 | `https://api-ap1.scanii.com` |
 | AP 2 | `https://api-ap2.scanii.com` |
 | CA 1 | `https://api-ca1.scanii.com` |
+| ~~Auto (default)~~ | ~~`https://api.scanii.com`~~ — **deprecated**, does not guarantee regional data placement |
 
 ## Errors
 
