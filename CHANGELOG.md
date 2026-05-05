@@ -2,6 +2,15 @@
 
 All notable changes to `@scanii/core` are documented here. Versions follow [SemVer](https://semver.org).
 
+## [1.3.0] — deprecate AUTO endpoint
+
+### Deprecated
+
+- `ScaniiClientOptions.endpoint` — omitting this field defaults to `https://api.scanii.com`
+  (AUTO routing), which does not guarantee regional data placement. Pass an explicit regional
+  host (`'https://api-us1.scanii.com'`, `'https://api-eu1.scanii.com'`, etc.) for data
+  residency compliance. The AUTO default will be removed in a future major version.
+
 ## [1.2.0] — v2.2 API surface
 
 ### Added

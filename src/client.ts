@@ -14,6 +14,7 @@ declare const SCANII_VERSION: string;
 const FALLBACK_VERSION = '0.0.0-dev';
 const VERSION: string = typeof SCANII_VERSION === 'string' ? SCANII_VERSION : FALLBACK_VERSION;
 
+/** @deprecated Use a regional endpoint string directly or via the `endpoint` option. Will be removed in a future major version. */
 const DEFAULT_ENDPOINT = 'https://api.scanii.com';
 const API_VERSION_PATH = '/v2.2';
 
@@ -32,9 +33,15 @@ export interface ScaniiClientOptions {
   /** Auth token id returned by {@link ScaniiClient.createAuthToken}. */
   token?: string;
   /**
-   * Override the API endpoint. Defaults to `https://api.scanii.com`. Use
-   * regional hosts (`https://api-eu1.scanii.com`, etc.) for data residency,
-   * or `http://localhost:4000` when running scanii-cli locally.
+   * Override the API endpoint.
+   *
+   * @deprecated Omitting this field defaults to `https://api.scanii.com`
+   * (AUTO routing), which does not guarantee regional data placement. Pass
+   * an explicit regional host — `'https://api-us1.scanii.com'`,
+   * `'https://api-eu1.scanii.com'`, etc. — for data residency compliance.
+   * The AUTO default will be removed in a future major version.
+   *
+   * Use `'http://localhost:4000'` when running scanii-cli locally.
    */
   endpoint?: string;
   /** Optional user-agent fragment prepended to the SDK's default. */
