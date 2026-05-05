@@ -21,12 +21,12 @@ npm install @scanii/core
 ## Quickstart
 
 ```ts
-import { ScaniiClient } from '@scanii/core';
+import { ScaniiClient, ScaniiTarget } from '@scanii/core';
 
 const client = new ScaniiClient({
   key: process.env.SCANII_KEY!,
   secret: process.env.SCANII_SECRET!,
-  endpoint: 'https://api-us1.scanii.com',
+  endpoint: ScaniiTarget.US1,
 });
 
 // Scan a file from disk (Node-only):
@@ -94,17 +94,19 @@ interface ScaniiProcessingResult {
 ## Regional endpoints
 
 ```ts
-new ScaniiClient({ key, secret, endpoint: 'https://api-eu1.scanii.com' });
+new ScaniiClient({ key, secret, endpoint: ScaniiTarget.EU1 });
 ```
 
-| Region | Endpoint |
+The `endpoint` option accepts either a `ScaniiTarget` constant or a bare URL string (useful for scanii-cli, e.g. `endpoint: 'http://localhost:4000'`).
+
+| Constant | Endpoint |
 |---|---|
-| US 1 | `https://api-us1.scanii.com` |
-| EU 1 | `https://api-eu1.scanii.com` |
-| EU 2 | `https://api-eu2.scanii.com` |
-| AP 1 | `https://api-ap1.scanii.com` |
-| AP 2 | `https://api-ap2.scanii.com` |
-| CA 1 | `https://api-ca1.scanii.com` |
+| `ScaniiTarget.US1` | `https://api-us1.scanii.com` |
+| `ScaniiTarget.EU1` | `https://api-eu1.scanii.com` |
+| `ScaniiTarget.EU2` | `https://api-eu2.scanii.com` |
+| `ScaniiTarget.AP1` | `https://api-ap1.scanii.com` |
+| `ScaniiTarget.AP2` | `https://api-ap2.scanii.com` |
+| `ScaniiTarget.CA1` | `https://api-ca1.scanii.com` |
 | ~~Auto (default)~~ | ~~`https://api.scanii.com`~~ — **deprecated**, does not guarantee regional data placement |
 
 ## Errors

@@ -2,6 +2,26 @@
 
 All notable changes to `@scanii/core` are documented here. Versions follow [SemVer](https://semver.org).
 
+## [1.4.0] — `ScaniiTarget` typed regional endpoints
+
+### Added
+
+- `ScaniiTarget` — typed regional endpoint constants (`ScaniiTarget.US1`, `EU1`, `EU2`,
+  `AP1`, `AP2`, `CA1`) exported from `@scanii/core`. Pass to
+  `new ScaniiClient({ endpoint })` instead of a bare URL string for ergonomics and
+  IDE autocomplete. The `endpoint` option still accepts bare URL strings (e.g. for
+  scanii-cli), so this is purely additive — no breaking change.
+
+  ```ts
+  import { ScaniiClient, ScaniiTarget } from '@scanii/core';
+  new ScaniiClient({ key, secret, endpoint: ScaniiTarget.US1 });
+  ```
+
+  `ScaniiTarget` is intentionally not provided for AUTO (latency-based routing) —
+  customer data residency / chain-of-custody compliance requires an explicit regional
+  choice. Brings `@scanii/core` in line with the cross-SDK pattern (`scanii-java`,
+  `scanii-python`, `scanii-php`, `scanii-rust`, `scanii-dotnet`, `scanii-ruby`).
+
 ## [1.3.0] — deprecate AUTO endpoint
 
 ### Deprecated
