@@ -2,6 +2,15 @@
 
 All notable changes to `@scanii/core` are documented here. Versions follow [SemVer](https://semver.org).
 
+## [1.4.1] — dependency refresh
+
+### Changed
+
+- Refreshed dev-dependency lockfile within existing ranges (jest 29.x, eslint 9.x,
+  typescript 5.x, ts-jest 29.x, tsup 8.x). No range/floor changes, no major jumps.
+  Zero runtime dependencies — the published package is unchanged.
+- Bumped CI actions: `actions/checkout` v4 → v7, `actions/setup-node` v4 → v7.
+
 ## [1.4.0] — `ScaniiTarget` typed regional endpoints
 
 ### Added
