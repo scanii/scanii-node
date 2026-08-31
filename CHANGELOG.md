@@ -2,6 +2,14 @@
 
 All notable changes to `@scanii/core` are documented here. Versions follow [SemVer](https://semver.org).
 
+## [Unreleased]
+
+### Changed
+
+- Dropped the "v2.2 preview" designation from `retrieveTrace` and `processFromUrl`.
+  The trace endpoint is no longer marked preview in the contract, and `processFromUrl`
+  was never preview; the methods themselves are unchanged.
+
 ## [1.4.1] — dependency refresh
 
 ## [1.5.0] — v2.2 delete endpoints split

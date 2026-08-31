@@ -266,9 +266,6 @@ export class ScaniiClient {
    * Returns `undefined` when the id is not found (HTTP 404). All other
    * error statuses throw a `ScaniiError` subclass as usual.
    *
-   * **Preview surface** — part of the v2.2 API; behavior may change in future
-   * releases.
-   *
    * @see {@link https://scanii.github.io/openapi/v22/} — `GET /files/{id}/trace`
    */
   async retrieveTrace(id: string): Promise<ScaniiTraceResult | undefined> {
@@ -290,9 +287,6 @@ export class ScaniiClient {
    * content from `location` and scans it, returning the result directly (HTTP
    * 201). The `location` parameter is a plain string URL — not a `URL` object
    * — matching the convention established by {@link fetch}.
-   *
-   * **Preview surface** — part of the v2.2 API; behavior may change in future
-   * releases.
    *
    * @see {@link https://scanii.github.io/openapi/v22/} — `POST /files`
    */
