@@ -4,6 +4,21 @@ All notable changes to `@scanii/core` are documented here. Versions follow [SemV
 
 ## [1.4.1] — dependency refresh
 
+## [1.5.0] — v2.2 delete endpoints split
+
+### Added
+
+- `ScaniiClient.delete(id)` maps to `DELETE /v2.2/files/{id}` and returns `true` on `204 No Content`.
+- `ScaniiClient.deleteTrace(id)` maps to `DELETE /v2.2/files/{id}/trace` and returns `true` on `204 No Content`.
+
+### Changed
+
+- Delete behavior now follows the revised v2.2 contract where deleting a processing result does not delete the trace.
+
+### Tested
+
+- Integration coverage for result-delete/trace-retained, trace-delete, and unknown-id error behavior.
+
 ### Changed
 
 - Refreshed dev-dependency lockfile within existing ranges (jest 29.x, eslint 9.x,

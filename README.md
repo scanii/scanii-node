@@ -58,6 +58,8 @@ For browser usage, prefer minting a short-lived auth token server-side and const
 | `fetch(url, metadata?, callback?)` | `POST /files/fetch` | `Promise<ScaniiPendingResult>` |
 | `retrieve(id)` | `GET /files/{id}` | `Promise<ScaniiProcessingResult>` |
 | `retrieveTrace(id)` | `GET /files/{id}/trace` | `Promise<ScaniiTraceResult \| undefined>` (v2.2 preview) |
+| `delete(id)` | `DELETE /files/{id}` | `Promise<boolean>` |
+| `deleteTrace(id)` | `DELETE /files/{id}/trace` | `Promise<boolean>` |
 | `ping()` | `GET /ping` | `Promise<boolean>` |
 | `createAuthToken(timeoutSeconds?)` | `POST /auth/tokens` | `Promise<ScaniiAuthToken>` |
 | `retrieveAuthToken(id)` | `GET /auth/tokens/{id}` | `Promise<ScaniiAuthToken>` |

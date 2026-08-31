@@ -381,6 +381,38 @@ export class ScaniiClient {
     return true;
   }
 
+  /**
+   * Delete a previously processed file result. The trace is not removed.
+   *
+   * @see {@link https://scanii.github.io/openapi/v22/} — `DELETE /files/{id}`
+   */
+  async delete(id: string): Promise<boolean> {
+    if (!id) {
+      throw new Error('id must not be empty');
+    }
+    const res = await this.request('DELETE', '/files/' + encodeURIComponent(id));
+    if (res.status !== 204) {
+      this.throwForStatus(res);
+    }
+    return true;
+  }
+
+  /**
+   * Delete the processing trace for a previously processed file.
+   *
+   * @see {@link https://scanii.github.io/openapi/v22/} — `DELETE /files/{id}/trace`
+   */
+  async deleteTrace(id: string): Promise<boolean> {
+    if (!id) {
+      throw new Error('id must not be empty');
+    }
+    const res = await this.request('DELETE', '/files/' + encodeURIComponent(id) + '/trace');
+    if (res.status !== 204) {
+      this.throwForStatus(res);
+    }
+    return true;
+  }
+
   private async request(
     method: string,
     path: string,
