@@ -52,12 +52,12 @@ For browser usage, prefer minting a short-lived auth token server-side and const
 |---|---|---|
 | `process(content, metadata?, callback?)` | `POST /files` | `Promise<ScaniiProcessingResult>` |
 | `processFile(path, metadata?, callback?)` | `POST /files` | `Promise<ScaniiProcessingResult>` |
-| `processFromUrl(location, options?)` | `POST /files` | `Promise<ScaniiProcessingResult>` (v2.2 preview) |
+| `processFromUrl(location, options?)` | `POST /files` | `Promise<ScaniiProcessingResult>` |
 | `processAsync(content, metadata?, callback?)` | `POST /files/async` | `Promise<ScaniiPendingResult>` |
 | `processAsyncFile(path, metadata?, callback?)` | `POST /files/async` | `Promise<ScaniiPendingResult>` |
 | `fetch(url, metadata?, callback?)` | `POST /files/fetch` | `Promise<ScaniiPendingResult>` |
 | `retrieve(id)` | `GET /files/{id}` | `Promise<ScaniiProcessingResult>` |
-| `retrieveTrace(id)` | `GET /files/{id}/trace` | `Promise<ScaniiTraceResult \| undefined>` (v2.2 preview) |
+| `retrieveTrace(id)` | `GET /files/{id}/trace` | `Promise<ScaniiTraceResult \| undefined>` |
 | `delete(id)` | `DELETE /files/{id}` | `Promise<boolean>` |
 | `deleteTrace(id)` | `DELETE /files/{id}/trace` | `Promise<boolean>` |
 | `ping()` | `GET /ping` | `Promise<boolean>` |
