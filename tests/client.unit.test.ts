@@ -196,6 +196,22 @@ describe('ScaniiClient request shape', () => {
     const init = fetchSpy.mock.calls[0]![1] as RequestInit;
     expect(init.method).toBe('DELETE');
   });
+
+  test('delete sends DELETE /v2.2/files/{id} and returns true on 204', async () => {
+    fetchSpy.mockResolvedValue(mockResponse(204, ''));
+    await expect(client.delete('scan-1')).resolves.toBe(true);
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe('http://localhost:4000/v2.2/files/scan-1');
+    expect((init as RequestInit).method).toBe('DELETE');
+  });
+
+  test('deleteTrace sends DELETE /v2.2/files/{id}/trace and returns true on 204', async () => {
+    fetchSpy.mockResolvedValue(mockResponse(204, ''));
+    await expect(client.deleteTrace('scan-2')).resolves.toBe(true);
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe('http://localhost:4000/v2.2/files/scan-2/trace');
+    expect((init as RequestInit).method).toBe('DELETE');
+  });
 });
 
 describe('ScaniiClient error mapping', () => {

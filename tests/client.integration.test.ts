@@ -217,6 +217,37 @@ describe('integration: scanii-cli', () => {
     expect(result).toBeUndefined();
   });
 
+  itIfCli('delete removes result while keeping trace retrievable', async () => {
+    const path = tempFile('hello delete result only');
+    try {
+      const processed = await client().process(readBlob(path));
+      expect(await client().delete(processed.id)).toBe(true);
+      await expect(client().retrieve(processed.id)).rejects.toThrow();
+      const trace = await client().retrieveTrace(processed.id);
+      expect(trace).toBeDefined();
+      expect(trace!.events.length).toBeGreaterThan(0);
+    } finally {
+      try { unlinkSync(path); } catch { /* ignore */ }
+    }
+  });
+
+  itIfCli('deleteTrace removes trace independently', async () => {
+    const path = tempFile('hello delete trace only');
+    try {
+      const processed = await client().process(readBlob(path));
+      expect(await client().deleteTrace(processed.id)).toBe(true);
+      const trace = await client().retrieveTrace(processed.id);
+      expect(trace).toBeUndefined();
+    } finally {
+      try { unlinkSync(path); } catch { /* ignore */ }
+    }
+  });
+
+  itIfCli('delete and deleteTrace throw for unknown ids', async () => {
+    await expect(client().delete('does-not-exist-delete-' + Date.now())).rejects.toThrow();
+    await expect(client().deleteTrace('does-not-exist-delete-trace-' + Date.now())).rejects.toThrow();
+  });
+
   itIfCli('processFromUrl fetches and scans remote URL synchronously', async () => {
     const r = await client().processFromUrl(`${ENDPOINT}/static/eicar.txt`);
     expect(r).toBeDefined();

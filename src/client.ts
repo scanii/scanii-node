@@ -381,6 +381,28 @@ export class ScaniiClient {
     return true;
   }
 
+  async delete(id: string): Promise<boolean> {
+    if (!id) {
+      throw new Error('id must not be empty');
+    }
+    const res = await this.request('DELETE', '/files/' + encodeURIComponent(id));
+    if (res.status !== 204) {
+      this.throwForStatus(res);
+    }
+    return true;
+  }
+
+  async deleteTrace(id: string): Promise<boolean> {
+    if (!id) {
+      throw new Error('id must not be empty');
+    }
+    const res = await this.request('DELETE', '/files/' + encodeURIComponent(id) + '/trace');
+    if (res.status !== 204) {
+      this.throwForStatus(res);
+    }
+    return true;
+  }
+
   private async request(
     method: string,
     path: string,
