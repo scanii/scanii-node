@@ -4,11 +4,22 @@ All notable changes to `@scanii/core` are documented here. Versions follow [SemV
 
 ## [Unreleased]
 
+## [1.5.1] — 2026-11-21
+
 ### Changed
 
 - Dropped the "v2.2 preview" designation from `retrieveTrace` and `processFromUrl`.
   The trace endpoint is no longer marked preview in the contract, and `processFromUrl`
   was never preview; the methods themselves are unchanged.
+
+### Security
+
+- `js-yaml` is updated from 3.15.1, 4.3.1 to 3.15.2, 4.3.2 for CVE-2026-84375
+  ([#10](https://github.com/scanii/scanii-node/pull/10)).
+- `handlebars` is updated from 4.7.9 to 4.7.10 for CVE-2026-106444,
+  CVE-2026-106446 ([#11](https://github.com/scanii/scanii-node/pull/11)).
+- `brace-expansion` is updated from 1.1.18, 5.0.9 to 1.1.21, 5.0.12 for
+  CVE-2026-102277 ([#11](https://github.com/scanii/scanii-node/pull/11)).
 
 ## [1.5.0] — v2.2 delete endpoints split
 
