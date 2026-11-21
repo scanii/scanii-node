@@ -10,8 +10,6 @@ All notable changes to `@scanii/core` are documented here. Versions follow [SemV
   The trace endpoint is no longer marked preview in the contract, and `processFromUrl`
   was never preview; the methods themselves are unchanged.
 
-## [1.4.1] — dependency refresh
-
 ## [1.5.0] — v2.2 delete endpoints split
 
 ### Added
@@ -33,6 +31,8 @@ All notable changes to `@scanii/core` are documented here. Versions follow [SemV
   typescript 5.x, ts-jest 29.x, tsup 8.x). No range/floor changes, no major jumps.
   Zero runtime dependencies — the published package is unchanged.
 - Bumped CI actions: `actions/checkout` v4 → v7, `actions/setup-node` v4 → v7.
+
+## [1.4.1] — dependency refresh
 
 ## [1.4.0] — `ScaniiTarget` typed regional endpoints
 
@@ -76,7 +76,7 @@ All notable changes to `@scanii/core` are documented here. Versions follow [SemV
 
 ---
 
-## 1.1.0 — Streaming standardization
+## [1.1.0] — Streaming standardization
 
 ### Added
 
@@ -88,7 +88,7 @@ No renames, no deprecations — the existing `process(content, ...)` API is unch
 
 ---
 
-## 1.0.1 — Initial release
+## [1.0.1] — Initial release
 
 First public release of the Scanii Node SDK as `@scanii/core`.
 
